@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VibeSec-Local | AI-Native Cybersecurity & Code Auditor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0c0e12;
+      --bg-surface: #14171f;
+      --bg-surface-elevated: #1b1f2b;
+      --bg-surface-hover: #222736;
+      --bg-code: #0a0c10;
+      
+      --border-subtle: rgba(255, 255, 255, 0.07);
+      --border-medium: rgba(255, 255, 255, 0.12);
+      --border-focus: rgba(99, 102, 241, 0.5);
+
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-tertiary: #64748b;
+      --text-inverse: #0f172a;
+
+      --accent: #6366f1;
+      --accent-soft: rgba(99, 102, 241, 0.12);
+      
+      --safe: #22c55e;
+      --safe-soft: rgba(34, 197, 94, 0.12);
+      
+      --warning: #eab308;
+      --warning-soft: rgba(234, 179, 8, 0.12);
+      
+      --danger: #f43f5e;
+      --danger-soft: rgba(244, 63, 94, 0.12);
+      
+      --info: #38bdf8;
+      --info-soft: rgba(56, 189, 248, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Navigation */
+    header {
+      height: 60px;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(12, 14, 18, 0.85);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-mark {
+      width: 28px;
+      height: 28px;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-medium);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      color: var(--text-primary);
+    }
+
+    .brand-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .brand-badge {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+
+    .status-pill.online {
+      border-color: rgba(34, 197, 94, 0.3);
+      color: #86efac;
+      background: var(--safe-soft);
+    }
+
+    .status-pill.offline {
+      border-color: rgba(234, 179, 8, 0.3);
+      color: #fde047;
+      background: var(--warning-soft);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* Buttons */
+    .btn {
+      height: 32px;
+      padding: 0 0.85rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: 1px solid transparent;
+      text-decoration: none;
+    }
+
+    .btn-secondary {
+      background: var(--bg-surface);
+      color: var(--text-primary);
+      border-color: var(--border-medium);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-surface-hover);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-primary {
+      background: #f1f5f9;
+      color: #0f172a;
+      font-weight: 600;
+    }
+
+    .btn-primary:hover {
+      background: #ffffff;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1300px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 2rem 4rem 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    /* Header View & Subtitle */
+    .view-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 1rem;
+    }
+
+    .view-title h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .view-title p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 0.25rem;
+      font-family: var(--font-mono);
+    }
+
+    /* Top Navigation Tabs */
+    .view-tabs {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      padding-bottom: 0.75rem;
+    }
+
+    .view-tab {
+      padding: 0.45rem 1rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .view-tab:hover {
+      color: var(--text-primary);
+      background: var(--bg-surface);
+    }
+
+    .view-tab.active {
+      color: #ffffff;
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-medium);
+    }
+
+    .view-tab-count {
+      padding: 0.1rem 0.4rem;
+      border-radius: 10px;
+      font-size: 0.7rem;
+      background: rgba(255, 255, 255, 0.08);
+      font-family: var(--font-mono);
+    }
+
+    /* Metrics Bar */
+    .metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+
+    .metric-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 1.15rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+    }
+
+    .metric-card.interactive {
+      cursor: pointer;
+    }
+
+    .metric-card.interactive:hover {
+      border-color: var(--border-medium);
+      background: var(--bg-surface-hover);
+    }
+
+    .metric-card.active-filter {
+      border-color: rgba(99, 102, 241, 0.5);
+      background: rgba(99, 102, 241, 0.06);
+    }
+
+    .metric-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-tertiary);
+    }
+
+    .metric-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-primary);
+    }
+
+    .metric-value.safe { color: #86efac; }
+    .metric-value.med { color: #fde047; }
+    .metric-value.high { color: #f472b6; }
+    .metric-value.crit { color: #f87171; }
+
+    /* Progress Banner */
+    .scan-progress-card {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.05));
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      display: none;
+      flex-direction: column;
+      gap: 0.6rem;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .progress-bar-track {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #6366f1, #a855f7, #38bdf8);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    /* Filter & Search Toolbar */
+    .filter-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-tabs {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--bg-surface);
+      padding: 0.25rem;
+      border-radius: 6px;
+      border: 1px solid var(--border-subtle);
+    }
+
+    .filter-pill {
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .filter-pill:hover {
+      color: var(--text-primary);
+    }
+
+    .filter-pill.active {
+      background: var(--bg-surface-elevated);
+      color: var(--text-primary);
+    }
+
+    .filter-badge {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      padding: 0 0.75rem;
+      height: 32px;
+      min-width: 260px;
+    }
+
+    .search-box input {
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      width: 100%;
+      outline: none;
+    }
+
+    /* Vulnerabilities Stack */
+    .vuln-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .vuln-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .vuln-item:hover {
+      border-color: var(--border-medium);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .vuln-item-header {
+      padding: 1.15rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .vuln-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      flex: 1;
+    }
+
+    .vuln-badges {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.18rem 0.55rem;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      text-decoration: none;
+    }
+
+    .tag-cwe {
+      font-family: var(--font-mono);
+      color: var(--text-secondary);
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      transition: all 0.15s ease;
+    }
+
+    .tag-cwe:hover {
+      color: #93c5fd;
+      border-color: rgba(147, 197, 253, 0.4);
+      background: rgba(59, 130, 246, 0.1);
+    }
+
+    .tag-sev.CRITICAL { color: #fb7185; background: var(--danger-soft); border: 1px solid rgba(244, 63, 94, 0.25); }
+    .tag-sev.HIGH { color: #c084fc; background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.25); }
+    .tag-sev.MEDIUM { color: #facc15; background: var(--warning-soft); border: 1px solid rgba(234, 179, 8, 0.25); }
+    .tag-sev.LOW { color: #38bdf8; background: var(--info-soft); border: 1px solid rgba(56, 189, 248, 0.25); }
+
+    .file-path {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-tertiary);
+    }
+
+    .vuln-heading {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .vuln-summary-text {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .vuln-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-shrink: 0;
+    }
+
+    .btn-learn {
+      height: 30px;
+      padding: 0 0.75rem;
+      font-size: 0.75rem;
+      background: var(--bg-surface-elevated);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+
+    .btn-learn:hover {
+      color: #93c5fd;
+      border-color: rgba(147, 197, 253, 0.3);
+      background: var(--bg-surface-hover);
+    }
+
+    .btn-inspect {
+      height: 30px;
+      padding: 0 0.75rem;
+      font-size: 0.75rem;
+      background: var(--accent-soft);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-inspect:hover {
+      background: rgba(99, 102, 241, 0.25);
+      border-color: #818cf8;
+      color: #ffffff;
+    }
+
+    .btn-fix {
+      height: 30px;
+      padding: 0 0.75rem;
+      font-size: 0.75rem;
+      background: rgba(34, 197, 94, 0.1);
+      color: #86efac;
+      border: 1px solid rgba(34, 197, 94, 0.25);
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn-fix:hover {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: #4ade80;
+      color: #ffffff;
+    }
+
+    /* Side-by-Side Diff Grid */
+    .diff-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    @media (max-width: 850px) {
+      .diff-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .diff-column {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .diff-column:first-child {
+      border-right: 1px solid var(--border-subtle);
+    }
+
+    .diff-tag {
+      padding: 0.45rem 1rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border-bottom: 1px solid var(--border-subtle);
+      font-family: var(--font-mono);
+    }
+
+    .diff-tag.original {
+      color: #fb7185;
+      background: rgba(244, 63, 94, 0.05);
+    }
+
+    .diff-tag.patch {
+      color: #4ade80;
+      background: rgba(34, 197, 94, 0.05);
+    }
+
+    .code-block {
+      padding: 0.85rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      line-height: 1.55;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      background: var(--bg-code);
+      min-height: 50px;
+    }
+
+    .code-block.original { color: #fca5a5; }
+    .code-block.patch { color: #86efac; }
+
+    /* Modal for Monaco / Staging Diff */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 1.5rem;
+    }
+
+    .modal-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-medium);
+      border-radius: 12px;
+      max-width: 900px;
+      width: 100%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      animation: modalPop 0.2s ease-out;
+    }
+
+    .modal-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .patch-editor-textarea {
+      width: 100%;
+      min-height: 140px;
+      background: var(--bg-code);
+      border: 1px solid var(--border-medium);
+      border-radius: 6px;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: #86efac;
+      outline: none;
+      resize: vertical;
+    }
+
+    .test-result-box {
+      padding: 0.75rem 1rem;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-family: var(--font-mono);
+      display: none;
+    }
+
+    .test-result-box.pass {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #86efac;
+    }
+
+    .test-result-box.fail {
+      background: rgba(244, 63, 94, 0.1);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: #fca5a5;
+    }
+
+    /* Clean State */
+    .clean-state {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 3.5rem 2rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .clean-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--safe-soft);
+      color: #86efac;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg-surface-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-medium);
+      padding: 0.75rem 1.25rem;
+      border-radius: 6px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      display: none;
+      align-items: center;
+      font-size: 0.82rem;
+      z-index: 1000;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes modalPop { from { transform: scale(0.96); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="brand-mark">🔒</div>
+      <div class="brand-title">
+        VibeSec <span class="brand-badge">PRO CYBER</span>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <div id="ollama-pill" class="status-pill online">
+        <div class="status-dot"></div>
+        <span id="ollama-text">Ollama (qwen2.5-coder:7b)</span>
+      </div>
+      <button id="btn-export-report" class="btn btn-secondary" onclick="exportReport('markdown')">
+        <span>📑</span> Export Report
+      </button>
+      <button id="btn-refresh-scan" class="btn btn-secondary" onclick="triggerScan()">
+        <span id="refresh-icon">🔄</span> <span id="refresh-text">Refresh Scan</span>
+      </button>
+      <button id="btn-fix-all-nav" class="btn btn-primary" onclick="fixAll()">
+        <span>⚡</span> Fix All Flaws
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- View Header -->
+    <div class="view-header">
+      <div class="view-title">
+        <h1>AI Cybersecurity & Code Audit</h1>
+        <p id="workspace-label">Watching local workspace</p>
+      </div>
+    </div>
+
+    <!-- View Tabs -->
+    <div class="view-tabs">
+      <div id="tab-sast" class="view-tab active" onclick="switchViewTab('sast')">
+        <span>🛡️ SAST Source Code</span>
+        <span id="tab-count-sast" class="view-tab-count">0</span>
+      </div>
+      <div id="tab-sca" class="view-tab" onclick="switchViewTab('sca')">
+        <span>📦 Supply Chain & SCA</span>
+        <span id="tab-count-sca" class="view-tab-count">0</span>
+      </div>
+      <div id="tab-report" class="view-tab" onclick="switchViewTab('report')">
+        <span>📑 Compliance Report</span>
+      </div>
+    </div>
+
+    <!-- Live Scan Progress Banner -->
+    <div id="scan-progress-box" class="scan-progress-card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; font-weight: 500;">
+          <div class="status-dot" style="animation: spin 1s linear infinite; width: 10px; height: 10px;"></div>
+          <span id="scan-status-title">Deep AI Security Audit in Progress...</span>
+        </div>
+        <div id="scan-progress-counter" style="font-size: 0.8rem; font-weight: 600; color: #a5b4fc;">0%</div>
+      </div>
+      <div class="progress-bar-track">
+        <div id="scan-progress-bar" class="progress-bar-fill" style="width: 0%;"></div>
+      </div>
+      <div id="scan-current-file-label" class="file-path">Auditing workspace files...</div>
+    </div>
+
+    <!-- Metrics Bar -->
+    <div class="metrics-bar">
+      <div class="metric-card" onclick="setSeverityFilter('ALL')">
+        <span class="metric-label">Health Score</span>
+        <span id="score-val" class="metric-value safe">100%</span>
+      </div>
+      <div id="card-crit" class="metric-card interactive" onclick="setSeverityFilter('CRITICAL')" title="Filter Critical vulnerabilities">
+        <span class="metric-label">Critical</span>
+        <span id="count-crit" class="metric-value">0</span>
+      </div>
+      <div id="card-high" class="metric-card interactive" onclick="setSeverityFilter('HIGH')" title="Filter High vulnerabilities">
+        <span class="metric-label">High</span>
+        <span id="count-high" class="metric-value">0</span>
+      </div>
+      <div id="card-med" class="metric-card interactive" onclick="setSeverityFilter('MEDIUM')" title="Filter Medium vulnerabilities">
+        <span class="metric-label">Medium</span>
+        <span id="count-med" class="metric-value">0</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Files Scanned</span>
+        <span id="count-files" class="metric-value">0</span>
+      </div>
+    </div>
+
+    <!-- SAST View Container -->
+    <div id="view-sast-container">
+      <!-- Filter & Search Toolbar -->
+      <div class="filter-section" style="margin-bottom: 1.25rem;">
+        <div class="filter-tabs">
+          <div id="pill-all" class="filter-pill active" onclick="setSeverityFilter('ALL')">
+            <span>All Findings</span>
+            <span id="badge-all" class="filter-badge">0</span>
+          </div>
+          <div id="pill-crit" class="filter-pill crit" onclick="setSeverityFilter('CRITICAL')">
+            <span>● Critical</span>
+            <span id="badge-crit" class="filter-badge">0</span>
+          </div>
+          <div id="pill-high" class="filter-pill high" onclick="setSeverityFilter('HIGH')">
+            <span>● High</span>
+            <span id="badge-high" class="filter-badge">0</span>
+          </div>
+          <div id="pill-med" class="filter-pill med" onclick="setSeverityFilter('MEDIUM')">
+            <span>● Medium</span>
+            <span id="badge-med" class="filter-badge">0</span>
+          </div>
+          <div id="pill-low" class="filter-pill low" onclick="setSeverityFilter('LOW')">
+            <span>● Low</span>
+            <span id="badge-low" class="filter-badge">0</span>
+          </div>
+        </div>
+
+        <div class="search-box">
+          <span>🔍</span>
+          <input id="search-input" type="text" placeholder="Filter by file, CWE or keyword..." oninput="handleSearch(this.value)" />
+        </div>
+      </div>
+
+      <div id="vuln-container" class="vuln-stack">
+        <!-- SAST items rendered here -->
+      </div>
+    </div>
+
+    <!-- SCA View Container -->
+    <div id="view-sca-container" style="display: none;">
+      <div id="sca-container" class="vuln-stack">
+        <!-- SCA items rendered here -->
+      </div>
+    </div>
+
+    <!-- Report View Container -->
+    <div id="view-report-container" style="display: none;">
+      <div class="vuln-item" style="padding: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h3>📑 Executive Compliance Report Preview</h3>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" onclick="exportReport('sarif')">Download SARIF 2.1.0</button>
+            <button class="btn btn-primary" onclick="exportReport('markdown')">Download Markdown</button>
+          </div>
+        </div>
+        <div id="report-preview-text" class="code-block" style="max-height: 500px; color: #cbd5e1; border-radius: 6px;"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Monaco / Staging Diff & Verification Modal -->
+  <div id="diff-modal" class="modal-backdrop">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div>
+          <h4 id="modal-title" style="font-size: 1rem; color: #ffffff;">Inspect & Verify Remediation</h4>
+          <span id="modal-subtitle" class="file-path"></span>
+        </div>
+        <button class="btn btn-secondary" onclick="closeDiffModal()" style="padding: 0 0.5rem;">✕</button>
+      </div>
+      <div class="modal-body">
+        <div>
+          <label style="font-size: 0.72rem; font-weight: 600; text-transform: uppercase; color: var(--text-tertiary);">Original Insecure Code (-)</label>
+          <div id="modal-original-code" class="code-block original" style="margin-top: 0.35rem; border-radius: 6px;"></div>
+        </div>
+
+        <div>
+          <label style="font-size: 0.72rem; font-weight: 600; text-transform: uppercase; color: var(--text-tertiary);">Interactive Patch Editor (+)</label>
+          <textarea id="modal-patch-textarea" class="patch-editor-textarea" style="margin-top: 0.35rem;"></textarea>
+        </div>
+
+        <div id="modal-test-box" class="test-result-box"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="modal-btn-verify" class="btn btn-secondary" onclick="runModalTestVerification()">
+          <span>🧪</span> Verify with Test Suite
+        </button>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-secondary" onclick="closeDiffModal()">Cancel</button>
+          <button id="modal-btn-apply" class="btn btn-primary" onclick="applyModalCustomPatch()">
+            <span>⚡</span> Apply Verified Patch
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    let currentData = null;
+    let activeFilter = 'ALL';
+    let activeTab = 'sast';
+    let searchQuery = '';
+    let currentModalIndex = null;
+
+    const CWE_LEARNING_LINKS = {
+      'CWE-89': { name: 'SQL Injection Prevention', url: 'https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html' },
+      'CWE-94': { name: 'Code Injection Defense', url: 'https://owasp.org/www-community/attacks/Code_Injection' },
+      'CWE-78': { name: 'Command Injection Defense', url: 'https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html' },
+      'CWE-79': { name: 'DOM XSS Prevention', url: 'https://cheatsheetseries.owasp.org/cheatsheets/DOM_based_XSS_Prevention_Cheat_Sheet.html' },
+      'CWE-798': { name: 'Secrets Management Guide', url: 'https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html' },
+      'CWE-693': { name: 'Content Security Policy (CSP)', url: 'https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP' },
+      'CWE-353': { name: 'Subresource Integrity (SRI)', url: 'https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity' },
+      'CWE-601': { name: 'Unvalidated Redirects & Sinks', url: 'https://cheatsheetseries.owasp.org/cheatsheets/Unvalidated_Redirects_and_Forwards_Cheat_Sheet.html' },
+      'CWE-338': { name: 'Cryptographic Randomness (CSPRNG)', url: 'https://cheatsheetseries.owasp.org/cheatsheets/Cryptographic_Storage_Cheat_Sheet.html' },
+      'CWE-1395': { name: 'CSS Injection Defense', url: 'https://owasp.org/www-community/attacks/CSS_Injection' },
+      'CWE-200': { name: 'Sensitive Data Exposure', url: 'https://owasp.org/www-project-top-ten/2017/A3_2017-Sensitive_Data_Exposure' },
+      'CWE-345': { name: 'Cross-Window Messaging Security', url: 'https://cheatsheetseries.owasp.org/cheatsheets/HTML5_Security_Cheat_Sheet.html#cross-window-messaging' },
+      'CWE-922': { name: 'Insecure LocalStorage Storage', url: 'https://cheatsheetseries.owasp.org/cheatsheets/HTML5_Security_Cheat_Sheet.html#local-storage' },
+      'CWE-327': { name: 'JWT & Cryptographic Security', url: 'https://cheatsheetseries.owasp.org/cheatsheets/JSON_Web_Token_for_Java_Cheat_Sheet.html' },
+      'CWE-502': { name: 'Deserialization Cheat Sheet', url: 'https://cheatsheetseries.owasp.org/cheatsheets/Deserialization_Cheat_Sheet.html' },
+      'CWE-22': { name: 'Path Traversal Prevention', url: 'https://owasp.org/www-community/attacks/Path_Traversal' }
+    };
+
+    function getCweMitreUrl(cweId) {
+      if (!cweId) return 'https://cwe.mitre.org/';
+      const match = cweId.match(/\d+/);
+      return match ? `https://cwe.mitre.org/data/definitions/${match[0]}.html` : 'https://cwe.mitre.org/';
+    }
+
+    function getLearningDoc(cweId) {
+      return (cweId && CWE_LEARNING_LINKS[cweId.toUpperCase()]) || {
+        name: 'OWASP Security Guide',
+        url: 'https://owasp.org/www-project-top-ten/'
+      };
+    }
+
+    function showToast(msg, duration = 3500) {
+      const toast = document.getElementById('toast');
+      toast.innerText = msg;
+      toast.style.display = 'flex';
+      setTimeout(() => { toast.style.display = 'none'; }, duration);
+    }
+
+    function switchViewTab(tab) {
+      activeTab = tab;
+      document.getElementById('tab-sast').classList.toggle('active', tab === 'sast');
+      document.getElementById('tab-sca').classList.toggle('active', tab === 'sca');
+      document.getElementById('tab-report').classList.toggle('active', tab === 'report');
+
+      document.getElementById('view-sast-container').style.display = (tab === 'sast') ? 'block' : 'none';
+      document.getElementById('view-sca-container').style.display = (tab === 'sca') ? 'block' : 'none';
+      document.getElementById('view-report-container').style.display = (tab === 'report') ? 'block' : 'none';
+
+      if (tab === 'report') {
+        loadReportPreview();
+      }
+    }
+
+    function setSeverityFilter(sev) {
+      activeFilter = sev;
+      updateFilterUI();
+      if (currentData) renderVulnerabilities(currentData);
+    }
+
+    function handleSearch(val) {
+      searchQuery = (val || '').toLowerCase().trim();
+      if (currentData) renderVulnerabilities(currentData);
+    }
+
+    function updateFilterUI() {
+      const pills = {
+        'ALL': document.getElementById('pill-all'),
+        'CRITICAL': document.getElementById('pill-crit'),
+        'HIGH': document.getElementById('pill-high'),
+        'MEDIUM': document.getElementById('pill-med'),
+        'LOW': document.getElementById('pill-low'),
+      };
+      Object.keys(pills).forEach(k => {
+        if (pills[k]) pills[k].classList.toggle('active', activeFilter === k);
+      });
+    }
+
+    async function fetchStatus() {
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        currentData = data;
+        render(data);
+      } catch (e) {
+        console.error('Fetch error:', e);
+      }
+    }
+
+    async function triggerScan() {
+      const refreshBtn = document.getElementById('btn-refresh-scan');
+      const refreshIcon = document.getElementById('refresh-icon');
+      const refreshText = document.getElementById('refresh-text');
+
+      if (refreshBtn) {
+        refreshBtn.disabled = true;
+        if (refreshIcon) refreshIcon.style.animation = 'spin 0.8s linear infinite';
+        if (refreshText) refreshText.innerText = 'Scanning...';
+      }
+
+      showToast('Auditing workspace (SAST + SCA)...');
+      const progressBox = document.getElementById('scan-progress-box');
+      if (progressBox) progressBox.style.display = 'flex';
+
+      try {
+        fetch('/api/scan', { method: 'POST' }).then(async (res) => {
+          const data = await res.json();
+          currentData = data;
+          render(data);
+          showToast('Audit complete!');
+        }).catch(e => {
+          showToast('Scan failed: ' + e);
+        }).finally(() => {
+          if (refreshBtn) {
+            refreshBtn.disabled = false;
+            if (refreshIcon) refreshIcon.style.animation = 'none';
+            if (refreshText) refreshText.innerText = 'Refresh Scan';
+          }
+        });
+        fetchStatus();
+      } catch (e) {
+        showToast('Scan error: ' + e);
+      }
+    }
+
+    async function fixAll() {
+      const btn = document.getElementById('btn-fix-all-nav');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⚡</span> Fixing All...';
+      }
+      showToast('Applying auto-remediations...');
+      try {
+        const res = await fetch('/api/fix', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        currentData = data;
+        render(data);
+        showToast(`Remediated ${data.patched_count || 0} issue(s) successfully!`);
+      } catch (e) {
+        showToast('Remediation error: ' + e);
+      } finally {
+        if (btn) btn.innerHTML = '<span>⚡</span> Fix All Flaws';
+      }
+    }
+
+    async function fixSingleIndex(index) {
+      const btn = document.getElementById(`fix-btn-${index}`);
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = 'Fixing...';
+      }
+      showToast('Applying secure patch...');
+      try {
+        const res = await fetch('/api/fix', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ vuln_index: index })
+        });
+        const data = await res.json();
+        currentData = data;
+        render(data);
+        showToast('Successfully remediated flaw!');
+      } catch (e) {
+        showToast('Fix failed: ' + e);
+      }
+    }
+
+    function inspectDiff(index) {
+      if (!currentData || !currentData.vulnerabilities[index]) return;
+      currentModalIndex = index;
+      const v = currentData.vulnerabilities[index];
+
+      document.getElementById('modal-title').innerText = `[${v.cwe_id}] ${v.title}`;
+      document.getElementById('modal-subtitle').innerText = `${v.file_path}:${v.line_number || 1}`;
+      document.getElementById('modal-original-code').innerText = v.original_code;
+      document.getElementById('modal-patch-textarea').value = v.remediation_patch;
+      
+      const testBox = document.getElementById('modal-test-box');
+      testBox.style.display = 'none';
+
+      document.getElementById('diff-modal').style.display = 'flex';
+    }
+
+    function closeDiffModal() {
+      document.getElementById('diff-modal').style.display = 'none';
+      currentModalIndex = null;
+    }
+
+    async function runModalTestVerification() {
+      if (currentModalIndex === null) return;
+      const verifyBtn = document.getElementById('modal-btn-verify');
+      const testBox = document.getElementById('modal-test-box');
+      const customPatch = document.getElementById('modal-patch-textarea').value;
+
+      verifyBtn.disabled = true;
+      verifyBtn.innerHTML = '<span>🧪</span> Running Test Runner...';
+      testBox.style.display = 'block';
+      testBox.className = 'test-result-box';
+      testBox.innerText = 'Executing project test suite in sandbox verification branch...';
+
+      try {
+        const res = await fetch('/api/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ vuln_index: currentModalIndex, custom_patch: customPatch })
+        });
+        const result = await res.json();
+        if (result.passed) {
+          testBox.className = 'test-result-box pass';
+          testBox.innerText = `✓ Test Suite Passed (${result.duration_ms}ms)\nCommand: ${result.command}\nStatus: Verified safe for production.`;
+        } else {
+          testBox.className = 'test-result-box fail';
+          testBox.innerText = `✗ Tests Failed (${result.duration_ms}ms)\nError: ${result.error_summary || result.output.substring(0, 300)}`;
+        }
+      } catch (e) {
+        testBox.className = 'test-result-box fail';
+        testBox.innerText = 'Test verification error: ' + e;
+      } finally {
+        verifyBtn.disabled = false;
+        verifyBtn.innerHTML = '<span>🧪</span> Verify with Test Suite';
+      }
+    }
+
+    async function applyModalCustomPatch() {
+      if (currentModalIndex === null) return;
+      const customPatch = document.getElementById('modal-patch-textarea').value;
+      showToast('Applying verified custom patch...');
+
+      try {
+        const res = await fetch('/api/apply_custom_patch', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ vuln_index: currentModalIndex, custom_patch: customPatch })
+        });
+        const data = await res.json();
+        currentData = data;
+        render(data);
+        closeDiffModal();
+        showToast('Successfully applied custom patch!');
+      } catch (e) {
+        showToast('Patch failed: ' + e);
+      }
+    }
+
+    async function loadReportPreview() {
+      try {
+        const res = await fetch('/api/report?format=markdown');
+        const data = await res.json();
+        document.getElementById('report-preview-text').innerText = data.report_markdown || 'No report data';
+      } catch (e) {
+        document.getElementById('report-preview-text').innerText = 'Failed to load report: ' + e;
+      }
+    }
+
+    async function exportReport(fmt) {
+      showToast(`Generating ${fmt.toUpperCase()} cybersecurity report...`);
+      try {
+        if (fmt === 'sarif') {
+          const res = await fetch('/api/report?format=sarif');
+          const data = await res.json();
+          downloadFile('vibesec_report.sarif', JSON.stringify(data, null, 2), 'application/json');
+        } else {
+          const res = await fetch('/api/report?format=markdown');
+          const data = await res.json();
+          downloadFile('VIBESEC_SECURITY_REPORT.md', data.report_markdown, 'text/markdown');
+        }
+        showToast('Report downloaded successfully!');
+      } catch (e) {
+        showToast('Report export failed: ' + e);
+      }
+    }
+
+    function downloadFile(filename, text, type) {
+      const blob = new Blob([text], { type: type });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+    }
+
+    function render(data) {
+      // Progress Banner
+      const progressBox = document.getElementById('scan-progress-box');
+      const progressBar = document.getElementById('scan-progress-bar');
+      const progressCounter = document.getElementById('scan-progress-counter');
+      const currentFileLabel = document.getElementById('scan-current-file-label');
+      const isScanning = data.is_scanning || (!data.has_completed_initial_scan && data.total_files > 0);
+
+      if (isScanning) {
+        if (progressBox) progressBox.style.display = 'flex';
+        const pct = Math.max(5, Math.min(100, data.scan_progress || 0));
+        if (progressBar) progressBar.style.width = `${pct}%`;
+        if (progressCounter) progressCounter.innerText = `${data.scanned_files || 0}/${data.total_files} files (${pct}%)`;
+        if (currentFileLabel) currentFileLabel.innerText = data.current_file ? `Auditing: ${data.current_file}` : 'Analyzing workspace with AI auditor...';
+      } else {
+        if (progressBox) progressBox.style.display = 'none';
+      }
+
+      // Score Value
+      const scoreVal = document.getElementById('score-val');
+      if (!data.has_completed_initial_scan && isScanning) {
+        scoreVal.innerText = 'Scanning...';
+        scoreVal.className = 'metric-value calculating';
+      } else {
+        scoreVal.innerText = `${data.health_score}%`;
+        scoreVal.className = (data.health_score < 70) ? 'metric-value crit' : (data.health_score < 90) ? 'metric-value med' : 'metric-value safe';
+      }
+
+      document.getElementById('count-crit').innerText = data.critical || 0;
+      document.getElementById('count-high').innerText = data.high || 0;
+      document.getElementById('count-med').innerText = data.medium || 0;
+      document.getElementById('count-files').innerText = data.scanned_files || data.total_files || 0;
+
+      document.getElementById('badge-all').innerText = data.total_vulnerabilities || 0;
+      document.getElementById('badge-crit').innerText = data.critical || 0;
+      document.getElementById('badge-high').innerText = data.high || 0;
+      document.getElementById('badge-med').innerText = data.medium || 0;
+      document.getElementById('badge-low').innerText = data.low || 0;
+
+      document.getElementById('tab-count-sast').innerText = data.total_vulnerabilities || 0;
+      document.getElementById('tab-count-sca').innerText = (data.sca_findings || []).length;
+      document.getElementById('workspace-label').innerText = data.root_dir ? `Watching ${data.root_dir}` : 'Watching local workspace';
+
+      // Ollama Pill
+      const pill = document.getElementById('ollama-pill');
+      const pillText = document.getElementById('ollama-text');
+      if (data.ollama_status && data.ollama_status.online) {
+        pill.className = 'status-pill online';
+        pillText.innerText = `Ollama (${data.ollama_status.model})`;
+      } else {
+        pill.className = 'status-pill offline';
+        pillText.innerText = 'Offline Tier-1 Mode';
+      }
+
+      const fixAllBtn = document.getElementById('btn-fix-all-nav');
+      if (fixAllBtn) {
+        fixAllBtn.disabled = data.total_vulnerabilities === 0 || isScanning;
+      }
+
+      updateFilterUI();
+      renderVulnerabilities(data);
+      renderSca(data);
+    }
+
+    function renderVulnerabilities(data) {
+      const container = document.getElementById('vuln-container');
+      container.innerHTML = '';
+      const isScanning = data.is_scanning || (!data.has_completed_initial_scan && data.total_files > 0);
+
+      if (isScanning && (!data.vulnerabilities || data.vulnerabilities.length === 0)) {
+        container.innerHTML = `
+          <div class="clean-state">
+            <div class="clean-icon"><div class="status-dot" style="animation: spin 1s linear infinite; width: 16px; height: 16px;"></div></div>
+            <h4>AI Security Audit in Progress</h4>
+            <p>VibeSec is auditing your workspace files with Ollama. Findings will populate in real-time.</p>
+          </div>
+        `;
+        return;
+      }
+
+      if (!data.vulnerabilities || data.vulnerabilities.length === 0) {
+        container.innerHTML = `
+          <div class="clean-state">
+            <div class="clean-icon">✓</div>
+            <h4>No Source Code Vulnerabilities</h4>
+            <p>All scanned code files pass security heuristics and LLM audit policies.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const filtered = data.vulnerabilities
+        .map((v, originalIndex) => ({ v, originalIndex }))
+        .filter(({ v }) => {
+          if (activeFilter !== 'ALL' && v.severity.toUpperCase() !== activeFilter) return false;
+          if (searchQuery) {
+            const haystack = `${v.cwe_id} ${v.title} ${v.file_path} ${v.explanation}`.toLowerCase();
+            return haystack.includes(searchQuery);
+          }
+          return true;
+        });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="clean-state">
+            <div class="clean-icon">🔍</div>
+            <h4>No Findings Matching Filter</h4>
+            <p>No vulnerabilities found matching severity <strong>${activeFilter}</strong>.</p>
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(({ v, originalIndex }) => {
+        const item = document.createElement('div');
+        item.className = 'vuln-item';
+        const mitreUrl = getCweMitreUrl(v.cwe_id);
+        const learnDoc = getLearningDoc(v.cwe_id);
+
+        item.innerHTML = `
+          <div class="vuln-item-header">
+            <div class="vuln-meta">
+              <div class="vuln-badges">
+                <a href="${mitreUrl}" target="_blank" rel="noopener noreferrer" class="tag tag-cwe">${escapeHtml(v.cwe_id)} ↗</a>
+                <span class="tag tag-sev ${escapeHtml(v.severity)}">${escapeHtml(v.severity)}</span>
+                <span class="file-path">${escapeHtml(v.file_path)}:${v.line_number || '?'}</span>
+              </div>
+              <div class="vuln-heading">${escapeHtml(v.title)}</div>
+              <div class="vuln-summary-text">${escapeHtml(v.explanation)}</div>
+            </div>
+            <div class="vuln-header-actions">
+              <a href="${learnDoc.url}" target="_blank" rel="noopener noreferrer" class="btn-learn">
+                <span>📚</span> Learn ↗
+              </a>
+              <button class="btn-inspect" onclick="inspectDiff(${originalIndex})">
+                <span>🔍</span> Inspect & Verify
+              </button>
+              <button id="fix-btn-${originalIndex}" class="btn-fix" onclick="fixSingleIndex(${originalIndex})">
+                <span>⚡</span> Fix This
+              </button>
+            </div>
+          </div>
+          <div class="diff-grid">
+            <div class="diff-column">
+              <span class="diff-tag original">Insecure Pattern (-)</span>
+              <div class="code-block original">${escapeHtml(v.original_code)}</div>
+            </div>
+            <div class="diff-column">
+              <span class="diff-tag patch">Verified Remediation (+)</span>
+              <div class="code-block patch">${escapeHtml(v.remediation_patch)}</div>
+            </div>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function renderSca(data) {
+      const container = document.getElementById('sca-container');
+      container.innerHTML = '';
+      const scaList = data.sca_findings || [];
+
+      if (scaList.length === 0) {
+        container.innerHTML = `
+          <div class="clean-state">
+            <div class="clean-icon">📦</div>
+            <h4>Supply Chain Clean</h4>
+            <p>No vulnerable third-party dependencies detected in package manifests.</p>
+          </div>
+        `;
+        return;
+      }
+
+      scaList.forEach((s) => {
+        const item = document.createElement('div');
+        item.className = 'vuln-item';
+        item.innerHTML = `
+          <div class="vuln-item-header">
+            <div class="vuln-meta">
+              <div class="vuln-badges">
+                <a href="https://nvd.nist.gov/vuln/detail/${escapeHtml(s.cve_id)}" target="_blank" rel="noopener noreferrer" class="tag tag-cwe">${escapeHtml(s.cve_id)} ↗</a>
+                <span class="tag tag-sev ${escapeHtml(s.severity)}">${escapeHtml(s.severity)} (CVSS ${s.cvss_score})</span>
+                <span class="file-path">${escapeHtml(s.manifest_file)}</span>
+              </div>
+              <div class="vuln-heading">${escapeHtml(s.title)} (${escapeHtml(s.package_name)}@${escapeHtml(s.installed_version)})</div>
+              <div class="vuln-summary-text">${escapeHtml(s.description)}</div>
+            </div>
+          </div>
+          <div style="padding: 0.85rem 1.25rem; background: var(--bg-code); display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-family: var(--font-mono); font-size: 0.78rem; color: #86efac;">
+              Upgrade Command: <code>${escapeHtml(s.remediation_cmd)}</code>
+            </div>
+            <button class="btn btn-secondary" style="height: 26px; font-size: 0.72rem;" onclick="navigator.clipboard.writeText('${escapeHtml(s.remediation_cmd)}'); showToast('Copied upgrade command!');">
+              Copy Command
+            </button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+
+    fetchStatus();
+    setInterval(fetchStatus, 1500);
+  </script>
+</body>
+</html>

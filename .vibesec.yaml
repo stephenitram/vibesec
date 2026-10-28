@@ -1,0 +1,12 @@
+# VibeSec-Local Configuration
+model: "qwen2.5-coder:7b"
+ollama_url: "http://localhost:11434"
+timeout_seconds: 30
+min_severity_to_block: "MEDIUM"
+auto_patch_prompt: true
+offline_fallback_to_heuristics: true
+max_tokens: 2048
+temperature: 0.0
+rules:
+  enabled: true
+  custom_patterns: []

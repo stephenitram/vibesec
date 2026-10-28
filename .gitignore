@@ -1,0 +1,61 @@
+# ==========================================
+# VibeSec-Local .gitignore
+# ==========================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Python Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+env.bak/
+venv.bak/
+
+# Build, Packaging & PyInstaller Distribution Artifacts
+build/
+dist/
+*.egg-info/
+*.egg
+vibesec.egg-info/
+
+# Pytest & Test Runner Caches
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Local Testing Sandboxes & Nested Repositories
+sandbox_repo/
+
+# Environment Variables, Secrets & Credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+
+# Generated Security Audit Reports & Runtime Logs
+*.log
+*.sarif
+AUDIT_REPORT.md
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# IDE & Editor Configurations
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
